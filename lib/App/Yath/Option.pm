@@ -383,12 +383,238 @@ App::Yath::Option - Representation of a yath option.
 
 =head1 DESCRIPTION
 
+This class represents a single command line option for yath.
 
 =head1 SYNOPSIS
 
+You usually will not be creating option instances directly. Usually you will
+use App::Yath::Options which provides sugar, and helps make sure options get to
+the right place.
 
-=head1 EXPORTS
+    use App::Yath::Options;
 
+    # You can specify a single option:
+    option color => (
+        prefix      => 'display',
+        category    => "Display Options",
+        description => "Turn color on, default is true if STDOUT is a TTY.",
+        default     => sub { -t STDOUT ? 1 : 0 },
+    );
+
+    # If you are specifying multiple options you can use an option_group to
+    # define common parameters.
+    option_group {prefix => 'display', category => "Display Options"} => sub {
+        option color => (
+            description => "Turn color on, default is true if STDOUT is a TTY.",
+            default     => sub { -t STDOUT ? 1 : 0 },
+        );
+
+        option verbose => (
+            short       => 'v',
+            type        => 'c',
+            description => "Be more verbose",
+            default     => 0,
+        );
+    };
+
+=head1 ATTRIBUTES
+
+These can be provided at object construction, or are generated internally.
+
+=head2 CONSTRUCTION ONLY
+
+=over 4
+
+=item applicable => sub { ($opt, $options) = @_; ...; return $bool }
+
+This is callback is used by the C<applicable()> method.
+
+=back
+
+=head2 READ-ONLY
+
+=over 4
+
+=item $class->new(action => sub ...)
+
+=item $coderef = $opt->action()
+
+    option foo => (
+        ...,
+        action => sub {
+            my ($prefix, $field_name, $raw_value, $normalized_value, $slot_ref, $settings, $handler, $options) = @_;
+
+            # If no action is specified the following is all that is normally
+            # done. Having an action means this is not done, so if you want the
+            # value stored you must call this or similar.
+            $handler->($slot, $normalized_value);
+        },
+    );
+
+=item $class->new(adds_options => $bool)
+
+=item $bool = $opt->adds_options()
+
+If this is true then it means using this option could result in more options
+being available (example: Loading a plugin).
+
+=item $class->new(alt => ['alt1', 'alt2', ...])
+
+=item $arrayref = $opt->alt()
+
+Provide alternative names for the option. These are aliases that can be used to
+achieve the same thing on the command line. This is mainly useful for
+backcompat if an option is renamed.
+
+=item $class->new(builds => ...)
+
+=item $val = $opt->builds()
+
+
+
+=item $class->new(category => ...)
+
+=item $val = $opt->category()
+
+=item $class->new(clear_env_vars => ...)
+
+=item $val = $opt->clear_env_vars()
+
+=item $class->new(default => ...)
+
+=item $val = $opt->default()
+
+=item $class->new(description => ...)
+
+=item $val = $opt->description()
+
+=item $class->new(env_vars => ...)
+
+=item $val = $opt->env_vars()
+
+=item $class->new(field => ...)
+
+=item $val = $opt->field()
+
+=item $class->new(from_command => ...)
+
+=item $val = $opt->from_command()
+
+=item $class->new(from_plugin => ...)
+
+=item $val = $opt->from_plugin()
+
+=item $class->new(long_examples => ...)
+
+=item $val = $opt->long_examples()
+
+=item $class->new(name => ...)
+
+=item $val = $opt->name()
+
+=item $class->new(negate => ...)
+
+=item $val = $opt->negate()
+
+=item $class->new(no_build => ...)
+
+=item $val = $opt->no_build()
+
+=item $class->new(normalize => ...)
+
+=item $val = $opt->normalize()
+
+=item $class->new(pre_command => ...)
+
+=item $val = $opt->pre_command()
+
+=item $class->new(pre_process => ...)
+
+=item $val = $opt->pre_process()
+
+=item $class->new(prefix => ...)
+
+=item $val = $opt->prefix()
+
+=item $class->new(short => ...)
+
+=item $val = $opt->short()
+
+=item $class->new(short_examples => ...)
+
+=item $val = $opt->short_examples()
+
+=item $class->new(title => ...)
+
+=item $val = $opt->title()
+
+=item $class->new(trace => ...)
+
+=item $val = $opt->trace()
+
+=item $class->new(type => ...)
+
+=item $val = $opt->type()
+
+=back
+
+=head1 METHODS
+
+=over 4
+
+=item $bool = $opt->allows_arg()
+
+True if arguments can be provided to the option (based on type).
+
+=item $bool = $opt->applicable($options)
+
+If an option provides an applicability callback this will use it to determine
+if the option is applicable given the L<App::Yath::Options> instance.
+
+If no callback was provided then this returns true.
+
+=item $opt->canon_type()
+
+=item $opt->get_default()
+
+=item $opt->get_normalized()
+
+=item $opt->handle()
+
+=item $opt->handle_negation()
+
+=item $opt->init()
+
+=item $opt->long_args()
+
+=item $opt->option_slot()
+
+=item $opt->requires_arg()
+
+=item $opt->trace_string()
+
+=item $opt->valid_type()
+
+=back
+
+=head2 DOCUMENTATION GENERATION
+
+=over 4
+
+=item $string = $opt->cli_docs()
+
+Get the option documentation in a format that works for the C<yath help
+COMMAND> command.
+
+=item $string = $opt->pod_docs()
+
+Get the option documentation in POD format.
+
+    =item ....
+
+    .. option details ...
+
+=back
 
 =head1 SOURCE
 
