@@ -10,6 +10,9 @@ use File::Spec;
 use Test2::Util qw/get_tid ipc_separator/;
 # HARNESS-DURATION-SHORT
 
+untie(*STDOUT);
+untie(*STDERR);
+
 print STDOUT "STDOUT: Mākaha\n";
 note "NOTE: Mākaha";
 ok(1, "ASSERT: Mākaha");

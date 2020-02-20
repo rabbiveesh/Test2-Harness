@@ -9,11 +9,13 @@ use Time::HiRes qw/time/;
 use IO::Handle;
 use File::Spec();
 
+use Test2::Formatter::Stream::IO;
+
 use Test2::Harness::Util::UUID qw/gen_uuid/;
 use Test2::Harness::Util::JSON qw/JSON JSON_IS_XS/;
 use Test2::Harness::Util qw/hub_truth apply_encoding/;
 
-use Test2::Util qw/get_tid ipc_separator/;
+use Test2::Util qw/get_tid ipc_separator clone_io/;
 
 use base qw/Test2::Formatter/;
 use Test2::Util::HashBase qw/-io _encoding _no_header _no_numbers _no_diag -stream_id -tb -tb_handles -dir -_pid -_tid -_fh <job_id/;
@@ -96,6 +98,7 @@ sub fh {
     return $self->{+_FH} = $fh;
 }
 
+my $IO_REPLACED;
 sub init {
     my $self = shift;
 
@@ -105,8 +108,10 @@ sub init {
         $_->autoflush(1);
     }
 
-    STDOUT->autoflush(1);
-    STDERR->autoflush(1);
+    unless ($IO_REPLACED++) {
+        tie(*STDOUT, 'Test2::Formatter::Stream::IO', 'STDOUT');
+        tie(*STDERR, 'Test2::Formatter::Stream::IO', 'STDERR');
+    }
 
     if ($INC{'Test2/API.pm'}) {
         Test2::API::test2_stdout()->autoflush(1);

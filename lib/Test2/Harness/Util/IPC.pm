@@ -86,6 +86,10 @@ sub _run_cmd_fork {
     my $stderr = $params{stderr};
     my $stdin  = $params{stdin};
 
+    untie(*STDIN);
+    untie(*STDOUT);
+    untie(*STDERR);
+
     open(my $OLD_STDERR, '>&', \*STDERR) or die "Could not clone STDERR: $!";
 
     my $die = sub {

@@ -63,6 +63,8 @@ tests find_yath => sub {
 };
 
 tests isolate_stdout => sub {
+    untie(*STDOUT);
+    untie(*STDERR);
     my ($stdout_r, $stdout_w, $stderr_r, $stderr_w);
     pipe($stdout_r, $stdout_w) or die "Could not open pipe: $!";
     pipe($stderr_r, $stderr_w) or die "Could not open pipe: $!";
